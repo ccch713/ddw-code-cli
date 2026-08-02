@@ -8,10 +8,10 @@ from pathlib import Path
 
 import pytest
 
-from minimax_agent import config as cfg_mod
-from minimax_agent.compact.auto_compact import auto_compact
-from minimax_agent.context.detector import detect
-from minimax_agent.tools import web_search
+from ddw_code import config as cfg_mod
+from ddw_code.compact.auto_compact import auto_compact
+from ddw_code.context.detector import detect
+from ddw_code.tools import web_search
 
 
 # ---------------------------------------------------------------- config
@@ -143,24 +143,24 @@ async def test_web_search_parses_results(monkeypatch: pytest.MonkeyPatch) -> Non
 
 
 def test_cli_help_runs(capsys) -> None:
-    from minimax_agent.cli import build_parser, main
+    from ddw_code.cli import build_parser, main
 
     with pytest.raises(SystemExit) as exc:
         main(["--help"])
     assert exc.value.code == 0
     captured = capsys.readouterr()
-    assert "minimax-agent" in captured.out
+    assert "ddw-code" in captured.out
 
 
 def test_cli_print_requires_prompt() -> None:
-    from minimax_agent.cli import main
+    from ddw_code.cli import main
 
     code = main(["--print", "--api-key", "sk-cp-x"])
     assert code == 2
 
 
 def test_cli_missing_api_key(monkeypatch: pytest.MonkeyPatch) -> None:
-    from minimax_agent.cli import main
+    from ddw_code.cli import main
 
     monkeypatch.delenv("MINIMAX_API_KEY", raising=False)
     monkeypatch.delenv("MINIMAX_TOKEN", raising=False)
@@ -176,8 +176,8 @@ async def test_provider_max_retries_exhausted(monkeypatch: pytest.MonkeyPatch) -
     """All retries fail with 503; we get a single error event."""
     import httpx
 
-    from minimax_agent.providers.base import ChatRequest
-    from minimax_agent.providers.minimax import MiniMaxProvider
+    from ddw_code.providers.base import ChatRequest
+    from ddw_code.providers.minimax import MiniMaxProvider
 
     def handler(request: httpx.Request) -> httpx.Response:
         return httpx.Response(503, text="down")
@@ -209,8 +209,8 @@ async def test_provider_invalid_json_skipped(monkeypatch: pytest.MonkeyPatch) ->
     """A malformed SSE line is skipped, not fatal."""
     import httpx
 
-    from minimax_agent.providers.base import ChatRequest
-    from minimax_agent.providers.minimax import MiniMaxProvider
+    from ddw_code.providers.base import ChatRequest
+    from ddw_code.providers.minimax import MiniMaxProvider
 
     body = "data: {not json}\ndata: [DONE]\n"
 

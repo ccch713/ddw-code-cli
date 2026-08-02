@@ -6,11 +6,11 @@ from typing import Any
 
 import pytest
 
-from minimax_agent.config import Config
-from minimax_agent.security.permissions import Decision, PermissionManager
-from minimax_agent.tools.builder import build_default_registry
-from minimax_agent.tools.dispatcher import ToolDispatcher, ToolNeedsConfirmation
-from minimax_agent.turn_loop import TurnEvent, TurnLoop
+from ddw_code.config import Config
+from ddw_code.security.permissions import Decision, PermissionManager
+from ddw_code.tools.builder import build_default_registry
+from ddw_code.tools.dispatcher import ToolDispatcher, ToolNeedsConfirmation
+from ddw_code.turn_loop import TurnEvent, TurnLoop
 
 from .conftest import (
     MockProvider,

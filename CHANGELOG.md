@@ -9,7 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - Agent loop engine with `max_turns=15` and micro-compact at 60% context
-- MiniMax API provider (OpenAI-compatible, SSE streaming, function calling)
+- **Multi-provider support**: MiniMax Token Plan, DeepSeek, OpenAI (any OpenAI-compatible API)
+- Provider registry with `--provider minimax|deepseek|openai` CLI flag
 - 8 built-in tools: `file_read`, `file_write`, `file_edit`, `bash`, `grep`, `glob`, `web_search`, `todo`
 - 4-level permission model (`allow` / `ask` / `deny` / `force_ask`)
 - Dangerous command detection (`rm -rf`, `sudo`, `git push --force`, etc.)
@@ -18,4 +19,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Project context detection (`AGENTS.md`, `CLAUDE.md`, `README.md`)
 - Language detection (Python / Node / Go / Rust / Java / Ruby)
 - CLI with `--print`, `--sandbox`, `--auto-approve` modes
-- 98 tests with 86% line coverage
+- 162 tests with 90% line coverage
+- GitHub Actions CI (Python 3.10/3.11/3.12)
+- Comprehensive documentation (architecture, tools, security, providers, token optimization)
+
+### Acknowledgments
+- Tool definitions inspired by CodeWhale
+- micro-compact algorithm adapted from MaxCode
+- Provider abstraction reference from MiMo Code CLI
+- Agent loop concept from Claude Code

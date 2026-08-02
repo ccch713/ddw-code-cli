@@ -3,9 +3,9 @@ requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "minimax-agent"
+name = "ddw-code-cli"
 version = "0.1.0"
-description = "A Claude Code-style Python CLI coding agent powered by MiniMax Token Plan"
+description = "Provider-agnostic CLI coding agent with token optimization"
 readme = "README.md"
 license = { text = "Apache-2.0" }
 authors = [{ name = "chenye", email = "ccch713@gmail.com" }]
@@ -43,10 +43,10 @@ dev = [
 ]
 
 [project.scripts]
-minimax-agent = "minimax_agent.cli:main"
+ddw-code = "ddw_code.cli:main"
 
 [tool.setuptools.packages.find]
-include = ["minimax_agent*"]
+include = ["ddw_code*"]
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"

@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import pytest
 
-from minimax_agent.compact.micro_compact import (
+from ddw_code.compact.micro_compact import (
     PLACEHOLDER,
     compact_messages,
     find_compressible_indices,

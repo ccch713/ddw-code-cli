@@ -7,8 +7,8 @@ from typing import Any
 import httpx
 import pytest
 
-from minimax_agent.providers.base import ChatRequest
-from minimax_agent.providers.minimax import MiniMaxProvider
+from ddw_code.providers.base import ChatRequest
+from ddw_code.providers.minimax import MiniMaxProvider
 
 
 def _sse_lines(payloads: list[dict[str, Any]], finish: str = "stop") -> str:

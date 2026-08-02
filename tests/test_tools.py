@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from minimax_agent.tools import (
+from ddw_code.tools import (
     bash,
     file_edit,
     file_read,
@@ -16,9 +16,9 @@ from minimax_agent.tools import (
     todo,
     web_search,
 )
-from minimax_agent.tools.builder import build_default_registry
-from minimax_agent.tools.dispatcher import ToolDispatcher
-from minimax_agent.security.permissions import PermissionManager
+from ddw_code.tools.builder import build_default_registry
+from ddw_code.tools.dispatcher import ToolDispatcher
+from ddw_code.security.permissions import PermissionManager
 
 
 def test_registry_has_eight_tools() -> None:
@@ -45,7 +45,7 @@ def test_registry_schemas_openai_shape() -> None:
 
 
 def test_registry_rejects_duplicate() -> None:
-    from minimax_agent.tools.registry import Tool, ToolRegistry
+    from ddw_code.tools.registry import Tool, ToolRegistry
 
     reg = ToolRegistry()
     reg.register(
@@ -192,7 +192,7 @@ def test_dispatcher_unknown_tool() -> None:
 
 
 def test_dispatcher_deny_policy() -> None:
-    from minimax_agent.security.permissions import Decision
+    from ddw_code.security.permissions import Decision
 
     reg = build_default_registry()
     perm = PermissionManager()

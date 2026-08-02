@@ -1,4 +1,4 @@
-"""Configuration management for minimax-agent.
+"""Configuration management for ddw-code.
 
 Loads settings from environment variables and CLI flags, with sensible defaults.
 The Token Plan key (`sk-cp-...`) is required and never logged.

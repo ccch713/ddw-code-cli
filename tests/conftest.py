@@ -18,8 +18,8 @@ if str(ROOT) not in sys.path:
 # Set a dummy API key so `load_config` works without env vars.
 os.environ.setdefault("MINIMAX_API_KEY", "sk-cp-test-key-for-tests-only")
 
-from minimax_agent.config import Config  # noqa: E402
-from minimax_agent.providers.base import (  # noqa: E402
+from ddw_code.config import Config  # noqa: E402
+from ddw_code.providers.base import (  # noqa: E402
     ChatRequest,
     ModelProvider,
     StreamEvent,

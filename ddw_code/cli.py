@@ -1,4 +1,4 @@
-"""minimax-agent CLI: parse args, build the loop, render output."""
+"""ddw-code CLI: parse args, build the loop, render output."""
 from __future__ import annotations
 
 import argparse
@@ -13,7 +13,7 @@ from rich.panel import Panel
 
 from .config import load_config
 from .context.detector import detect
-from .providers.minimax import MiniMaxProvider
+from .providers import get_provider
 from .security.permissions import PermissionManager
 from .tools.builder import build_default_registry
 from .tools.dispatcher import ToolDispatcher
@@ -25,8 +25,8 @@ err_console = Console(stderr=True)
 
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
-        prog="minimax-agent",
-        description="A Claude Code-style Python CLI coding agent powered by MiniMax Token Plan.",
+        prog="ddw-code",
+        description="Provider-agnostic CLI coding agent with token optimization.",
     )
     p.add_argument(
         "--print",
@@ -34,7 +34,13 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Non-interactive mode: run once, print result, exit.",
     )
-    p.add_argument("--api-key", help="MiniMax API key (or set MINIMAX_API_KEY).")
+    p.add_argument(
+        "--provider",
+        choices=["minimax", "deepseek", "openai"],
+        default="minimax",
+        help="LLM provider (default: minimax).",
+    )
+    p.add_argument("--api-key", help="API key (or set MINIMAX_API_KEY).")
     p.add_argument("--base-url", help="Override the API base URL.")
     p.add_argument("--model", help="Override the model name.")
     p.add_argument("--max-turns", type=int, help="Max tool-call turns per request.")
@@ -82,7 +88,7 @@ async def run_loop(
     """Run a single turn and return (final_text, exit_code)."""
     final_text = ""
     last_event: TurnEvent | None = None
-    with console.status("[bold green]minimax-agent thinking...[/bold green]") if not print_mode else _NullCtx():
+    with console.status("[bold green]ddw-code thinking...[/bold green]") if not print_mode else _NullCtx():
         async for ev in loop.run(prompt, system_extra=system_extra):
             last_event = ev
             if ev.kind == "text_delta":
@@ -184,11 +190,16 @@ async def amain(args: argparse.Namespace) -> int:
         )
     system_extra = proj.system_prompt_extras()
 
-    provider = MiniMaxProvider(
-        api_key=config.api_key,
-        base_url=config.base_url,
-        timeout=config.request_timeout,
-    )
+    try:
+        provider = get_provider(
+            args.provider,
+            api_key=config.api_key,
+            base_url=config.base_url,
+            timeout=config.request_timeout,
+        )
+    except ValueError as e:
+        err_console.print(f"[bold red]provider error:[/bold red] {e}")
+        return 2
     try:
         registry = build_default_registry()
         perm = PermissionManager()
@@ -244,7 +255,7 @@ async def amain(args: argparse.Namespace) -> int:
         # Interactive mode.
         console.print(
             Panel(
-                "[bold green]minimax-agent[/bold green] — interactive mode\n"
+                "[bold green]ddw-code[/bold green] — interactive mode\n"
                 "Type your request and press Enter. Ctrl-D or `exit` to quit.",
                 border_style="green",
             )

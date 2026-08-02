@@ -10,16 +10,16 @@ from pathlib import Path
 
 import pytest
 
-from minimax_agent.compact.micro_compact import (
+from ddw_code.compact.micro_compact import (
     _approx_tokens,
     _content_str,
     should_compact,
 )
-from minimax_agent.security.danger_check import find_ripgrep
-from minimax_agent.security.permissions import Decision, PermissionManager
-from minimax_agent.tools import bash, grep
-from minimax_agent.tools.builder import build_default_registry
-from minimax_agent.tools.dispatcher import ToolDispatcher
+from ddw_code.security.danger_check import find_ripgrep
+from ddw_code.security.permissions import Decision, PermissionManager
+from ddw_code.tools import bash, grep
+from ddw_code.tools.builder import build_default_registry
+from ddw_code.tools.dispatcher import ToolDispatcher
 
 
 def test_approx_tokens_empty() -> None:
@@ -194,7 +194,7 @@ def test_dispatcher_invalid_json_args() -> None:
 
 
 def test_dispatcher_handler_exception() -> None:
-    from minimax_agent.tools.registry import Tool, ToolRegistry
+    from ddw_code.tools.registry import Tool, ToolRegistry
 
     async def boom(**kwargs):
         raise RuntimeError("kaboom")
@@ -220,8 +220,8 @@ def test_dispatcher_handler_exception() -> None:
 
 
 def test_cli_sandbox_policy(monkeypatch: pytest.MonkeyPatch) -> None:
-    from minimax_agent.cli import _apply_sandbox
-    from minimax_agent.security.permissions import Decision, PermissionManager
+    from ddw_code.cli import _apply_sandbox
+    from ddw_code.security.permissions import Decision, PermissionManager
 
     p = PermissionManager()
     _apply_sandbox(p)
@@ -234,8 +234,8 @@ def test_cli_sandbox_policy(monkeypatch: pytest.MonkeyPatch) -> None:
 
 def test_cli_print_runs_with_mock(monkeypatch: pytest.MonkeyPatch) -> None:
     """End-to-end CLI test: --print invokes the provider through TurnLoop."""
-    from minimax_agent.cli import main
-    from minimax_agent.providers.base import StreamEvent
+    from ddw_code.cli import main
+    from ddw_code.providers.base import StreamEvent
 
     class FakeProvider:
         name = "fake"
@@ -259,7 +259,7 @@ def test_cli_print_runs_with_mock(monkeypatch: pytest.MonkeyPatch) -> None:
     def fake_provider(*args, **kwargs):
         return fake
 
-    monkeypatch.setattr("minimax_agent.cli.MiniMaxProvider", fake_provider)
+    monkeypatch.setattr("ddw_code.cli.get_provider", fake_provider)
     # Make sure confirm prompt doesn't fire — auto-approve.
     code = main(["--print", "--api-key", "sk-cp-x", "--auto-approve", "say hi"])
     assert code == 0
@@ -268,8 +268,8 @@ def test_cli_print_runs_with_mock(monkeypatch: pytest.MonkeyPatch) -> None:
 
 def test_cli_auto_approve_flag(monkeypatch: pytest.MonkeyPatch) -> None:
     """--auto-approve makes every tool run without confirmation."""
-    from minimax_agent.cli import main
-    from minimax_agent.providers.base import StreamEvent, ToolUseBlock, Usage
+    from ddw_code.cli import main
+    from ddw_code.providers.base import StreamEvent, ToolUseBlock, Usage
 
     class FakeProvider:
         name = "fake"
@@ -296,7 +296,7 @@ def test_cli_auto_approve_flag(monkeypatch: pytest.MonkeyPatch) -> None:
         async def aclose(self) -> None:
             return None
 
-    monkeypatch.setattr("minimax_agent.cli.MiniMaxProvider", lambda *a, **kw: FakeProvider())
+    monkeypatch.setattr("ddw_code.cli.get_provider", lambda *a, **kw: FakeProvider())
     # With --auto-approve, no prompt; bash runs and the loop terminates.
     code = main(
         [

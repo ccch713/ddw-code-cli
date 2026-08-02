@@ -5,12 +5,12 @@ from pathlib import Path
 
 import pytest
 
-from minimax_agent.security.danger_check import (
+from ddw_code.security.danger_check import (
     find_ripgrep,
     is_dangerous_command,
     is_forbidden_path,
 )
-from minimax_agent.security.permissions import (
+from ddw_code.security.permissions import (
     DEFAULT_POLICY,
     Decision,
     PermissionManager,

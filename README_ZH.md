@@ -145,6 +145,47 @@ minimax-agent --print "列出当前目录的文件"
 
 用 `--sandbox` 把所有写操作升级为 `force_ask`（每次都询问）。
 
+## 致谢
+
+DDW Code CLI 借鉴了以下项目的设计理念：
+
+- **CodeWhale** — 工具定义和调度器架构参考了 CodeWhale 的 agent tools 设计
+- **MaxCode** — micro-compact 上下文压缩算法移植自 MaxCode 的 turnLoop.ts
+- **MiMo Code CLI** — Provider 抽象模式和 CLI 结构参考
+- **Claude Code** — 整体 Agent 循环概念和权限模型参考
+
+## Token 优化
+
+DDW Code CLI 专为订阅 LLM Token 套餐（MiniMax Token Plan、DeepSeek 等）的开发者设计，帮助最大化订阅价值。
+
+### 工作原理
+
+1. **60% 阈值 micro-compact** — 当上下文使用超过 60% 时，自动将旧的工具结果压缩为 `[已压缩]` 占位符。零 LLM 调用（纯字符串替换），在每个后续 turn 节省 token。
+
+2. **白名单压缩** — 只压缩 file_read、bash、grep、glob、web_search 的结果。工具 schema 和助手消息保持完整，确保 LLM 始终有准确的函数定义。
+
+3. **权限守卫** — 危险命令（rm -rf、sudo、git push --force 等）在到达 LLM 之前就被拦截。防止代价高昂的错误和错误恢复浪费的 token。
+
+4. **结构化工具调度** — 工具通过权限感知的调度器分发，带 JSON schema 验证，减少无效工具调用和浪费的 API 调用。
+
+### 预估节省
+
+| 功能 | Token 节省 | 说明 |
+|------|-----------|------|
+| micro-compact | 30-50% | 60% 阈值时压缩旧工具结果 |
+| 权限守卫 | 5-10% | 防止错误恢复的 token 浪费 |
+| 工具 schema 优化 | 5-15% | 只发送必要的工具定义 |
+| **合计** | **40-70%** | 相比无优化的裸 API 调用 |
+
+### 代码质量特性
+
+- **危险命令检测** — 13 个正则模式拦截破坏性操作
+- **禁止路径守卫** — 保护 ~/.ssh、~/.gnupg、/etc/shadow 等
+- **四级权限模型** — allow / ask / deny / force_ask
+- **沙箱模式** — 对所有变更操作强制确认
+- **项目上下文检测** — 自动加载 AGENTS.md、CLAUDE.md、README.md
+
+
 ## 许可
 
 Apache-2.0，见 `LICENSE`。

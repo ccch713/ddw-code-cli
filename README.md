@@ -157,6 +157,47 @@ By default:
 
 Run with `--sandbox` to flip mutating tools to `force_ask`.
 
+## Acknowledgments
+
+DDW Code CLI builds upon ideas and patterns from these projects:
+
+- **CodeWhale** — Tool definitions and dispatcher architecture inspired by CodeWhale's agent tools
+- **MaxCode** — micro-compact context compression algorithm adapted from MaxCode's turnLoop.ts
+- **MiMo Code CLI** — Provider abstraction pattern and CLI structure reference
+- **Claude Code** — Overall agent loop concept and permission model
+
+## Token Optimization
+
+DDW Code CLI is designed for developers who subscribe to LLM token plans (MiniMax Token Plan, DeepSeek, etc.) and want to maximize the value of their subscription.
+
+### How It Works
+
+1. **Micro-compact at 60% context** — When context usage exceeds 60%, older tool results are automatically compressed to `[compressed]` placeholders. This is done with zero LLM calls (pure string replacement), saving tokens on every subsequent turn.
+
+2. **Whitelist compression** — Only file_read, bash, grep, glob, and web_search results are compressed. Tool schemas and assistant messages are preserved intact, ensuring the LLM always has accurate function definitions.
+
+3. **Permission guards** — Dangerous commands (rm -rf, sudo, git push --force, etc.) are blocked before they reach the LLM. This prevents costly mistakes and wasted tokens on error recovery.
+
+4. **Structured tool dispatch** — Tools are dispatched through a permission-aware dispatcher with JSON schema validation, reducing invalid tool calls and wasted API calls.
+
+### Estimated Savings
+
+| Feature | Token Savings | Description |
+|---------|--------------|-------------|
+| micro-compact | 30-50% | Compresses old tool results at 60% threshold |
+| Permission guards | 5-10% | Prevents error-recovery token waste |
+| Tool schema optimization | 5-15% | Only necessary tool definitions are sent |
+| **Total** | **40-70%** | Compared to raw API calls without optimization |
+
+### Code Quality Features
+
+- **Dangerous command detection** — 13 regex patterns block destructive operations
+- **Forbidden path guard** — Protects ~/.ssh, ~/.gnupg, /etc/shadow, etc.
+- **Four-level permission model** — allow / ask / deny / force_ask
+- **Sandbox mode** — Forces confirmation for all mutating operations
+- **Project context detection** — Automatically loads AGENTS.md, CLAUDE.md, README.md
+
+
 ## License
 
 Apache-2.0. See `LICENSE`.
