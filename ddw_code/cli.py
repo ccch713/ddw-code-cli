@@ -60,6 +60,11 @@ def build_parser() -> argparse.ArgumentParser:
         help="Auto-approve mutating tools (bash, file_write, file_edit).",
     )
     p.add_argument(
+        "--no-context",
+        action="store_true",
+        help="Skip loading project context files (AGENTS.md, README.md). Reduces token usage.",
+    )
+    p.add_argument(
         "--verbose", "-v", action="store_true", help="Verbose logging to stderr."
     )
     p.add_argument(
@@ -188,7 +193,13 @@ async def amain(args: argparse.Namespace) -> int:
             f"[dim]workspace={config.workspace} language={proj.language} "
             f"context_files={[p.name for p in proj.context_files]}[/dim]"
         )
-    system_extra = proj.system_prompt_extras()
+    # Only load project context if --no-context is not set
+    if args.no_context:
+        system_extra = ""
+        if args.verbose:
+            console.print("[dim]Skipping project context (--no-context)[/dim]")
+    else:
+        system_extra = proj.system_prompt_extras()
 
     try:
         provider = get_provider(

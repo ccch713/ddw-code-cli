@@ -21,9 +21,10 @@ from ddw_code.tools.dispatcher import ToolDispatcher
 from ddw_code.security.permissions import PermissionManager
 
 
-def test_registry_has_eight_tools() -> None:
+def test_registry_contains_original_eight_tools() -> None:
+    """The 8 original tools are still present after the Phase 1 expansion."""
     reg = build_default_registry()
-    assert len(reg) == 8
+    names = {t.name for t in reg.all()}
     expected = {
         "file_read",
         "file_write",
@@ -34,7 +35,64 @@ def test_registry_has_eight_tools() -> None:
         "web_search",
         "todo",
     }
-    assert {t.name for t in reg.all()} == expected
+    assert expected <= names, f"missing original tools: {expected - names}"
+
+
+def test_registry_has_at_least_29_tools() -> None:
+    """Phase 1 expansion target: 8 original + 8 git + 4 file + 5 test + 2 web + 1 find + 1 dependency."""
+    reg = build_default_registry()
+    assert len(reg) >= 29, f"expected >= 29 tools, got {len(reg)}"
+
+
+def test_registry_includes_git_tools() -> None:
+    reg = build_default_registry()
+    names = {t.name for t in reg.all()}
+    git_tools = {
+        "git_status",
+        "git_diff",
+        "git_commit",
+        "git_push",
+        "git_pull",
+        "git_branch",
+        "git_merge",
+        "git_log",
+    }
+    assert git_tools <= names, f"missing git tools: {git_tools - names}"
+
+
+def test_registry_includes_test_tools() -> None:
+    reg = build_default_registry()
+    names = {t.name for t in reg.all()}
+    expected = {"test_run", "lint", "typecheck", "format", "coverage"}
+    assert expected <= names, f"missing test/quality tools: {expected - names}"
+
+
+def test_registry_includes_extended_file_tools() -> None:
+    reg = build_default_registry()
+    names = {t.name for t in reg.all()}
+    expected = {"file_delete", "file_move", "file_copy", "file_list"}
+    assert expected <= names, f"missing extended file tools: {expected - names}"
+
+
+def test_registry_includes_extended_web_tools() -> None:
+    reg = build_default_registry()
+    names = {t.name for t in reg.all()}
+    expected = {"web_fetch", "web_extract", "find", "dependency"}
+    assert expected <= names, f"missing extended tools: {expected - names}"
+
+
+def test_git_tools_require_confirmation() -> None:
+    """All mutating git operations (commit/push/pull/branch/merge) require confirmation."""
+    reg = build_default_registry()
+    must_confirm = {"git_commit", "git_push", "git_pull", "git_branch", "git_merge"}
+    for tool in reg.all():
+        if tool.name in must_confirm:
+            assert tool.requires_confirmation, f"{tool.name} should require confirmation"
+    # Read-only git operations do NOT.
+    read_only = {"git_status", "git_diff", "git_log"}
+    for tool in reg.all():
+        if tool.name in read_only:
+            assert not tool.requires_confirmation, f"{tool.name} should not require confirmation"
 
 
 def test_registry_schemas_openai_shape() -> None:

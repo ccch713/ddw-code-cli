@@ -83,8 +83,14 @@ async def test_auto_compact_short_input() -> None:
 
 @pytest.mark.asyncio
 async def test_auto_compact_collapses_old() -> None:
+    """A scripted summariser collapses older turns behind one summary message."""
     msgs = [{"role": "user", "content": f"msg{i}"} for i in range(15)]
-    out = await auto_compact(msgs, provider=None, keep_recent=5)  # type: ignore[arg-type]
+
+    class _StubProvider:
+        async def summarise(self, prompt: str) -> str:
+            return "summary body"
+
+    out = await auto_compact(msgs, provider=_StubProvider(), keep_recent=5)  # type: ignore[arg-type]
     # We added a system summary, dropped 10 old user msgs, kept 5.
     assert len(out) == 6
     assert out[0]["role"] == "system"

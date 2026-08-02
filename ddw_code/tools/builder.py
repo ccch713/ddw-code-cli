@@ -7,20 +7,36 @@ from __future__ import annotations
 
 from . import (
     bash,
+    dependency,
+    file_copy,
+    file_delete,
     file_edit,
+    file_list,
+    file_move,
     file_read,
     file_write,
+    find,
     glob,
     grep,
+    test as _test,
     todo,
+    web_extract,
+    web_fetch,
     web_search,
 )
+from .agent import register as _register_agent
+from .git import register as _register_git
 from .registry import Tool, ToolRegistry
 
 
 def build_default_registry() -> ToolRegistry:
-    """Return a registry populated with the eight built-in tools."""
+    """Return a registry populated with every built-in tool.
+
+    Tool count is now 29 (8 original + 8 git + 4 file + 5 test + 2 web + 1 find + 1 dependency).
+    """
     reg = ToolRegistry()
+
+    # ---- Original 8 tools ----
     reg.register(
         Tool(
             name="file_read",
@@ -110,6 +126,104 @@ def build_default_registry() -> ToolRegistry:
             compactable=False,
         )
     )
+
+    # ---- File operations extension (4) ----
+    reg.register(
+        Tool(
+            name="file_delete",
+            description="Delete a file or directory (set recursive=True for rmtree).",
+            input_schema=file_delete.schema(),
+            handler=file_delete.file_delete,
+            requires_confirmation=True,
+            compactable=True,
+        )
+    )
+    reg.register(
+        Tool(
+            name="file_move",
+            description="Move or rename a file/directory (overwrite=False by default).",
+            input_schema=file_move.schema(),
+            handler=file_move.file_move,
+            requires_confirmation=True,
+            compactable=True,
+        )
+    )
+    reg.register(
+        Tool(
+            name="file_copy",
+            description="Copy a file to a new path, preserving metadata.",
+            input_schema=file_copy.schema(),
+            handler=file_copy.file_copy,
+            requires_confirmation=False,
+            compactable=True,
+        )
+    )
+    reg.register(
+        Tool(
+            name="file_list",
+            description="List directory contents with optional recursive walk and pattern filter.",
+            input_schema=file_list.schema(),
+            handler=file_list.file_list,
+            requires_confirmation=False,
+            compactable=True,
+        )
+    )
+
+    # ---- Web extension (2) ----
+    reg.register(
+        Tool(
+            name="web_fetch",
+            description="Fetch a URL and return its body as plain text (HTML stripped).",
+            input_schema=web_fetch.schema(),
+            handler=web_fetch.web_fetch,
+            requires_confirmation=False,
+            compactable=True,
+        )
+    )
+    reg.register(
+        Tool(
+            name="web_extract",
+            description="Fetch a URL and return title/meta/selector matches.",
+            input_schema=web_extract.schema(),
+            handler=web_extract.web_extract,
+            requires_confirmation=False,
+            compactable=True,
+        )
+    )
+
+    # ---- Search extension (1) ----
+    reg.register(
+        Tool(
+            name="find",
+            description="Find files/directories by name (substring or glob) with type filter.",
+            input_schema=find.schema(),
+            handler=find.find,
+            requires_confirmation=False,
+            compactable=True,
+        )
+    )
+
+    # ---- Project extension (1) ----
+    reg.register(
+        Tool(
+            name="dependency",
+            description="List/add/remove Python dependencies in requirements.txt or pyproject.toml.",
+            input_schema=dependency.schema(),
+            handler=dependency.dependency,
+            requires_confirmation=True,
+            compactable=True,
+        )
+    )
+
+    # ---- Git tools (8) ----
+    _register_git(reg)
+
+    # ---- Test/quality tools (5) ----
+    _test.register(reg)
+
+    # ---- Agent tools (5) ----
+    _register_agent(reg)
+
     return reg
 
 

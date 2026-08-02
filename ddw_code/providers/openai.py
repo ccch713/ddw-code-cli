@@ -137,6 +137,7 @@ class OpenAIProvider(ModelProvider):
             "max_tokens": request.max_tokens,
             "temperature": request.temperature,
             "stream": True,
+            "stream_options": {"include_usage": True},
         }
         if request.tools:
             payload["tools"] = self._translate_tools(request.tools)
@@ -251,6 +252,25 @@ class OpenAIProvider(ModelProvider):
                 finish = choice.get("finish_reason")
                 if finish:
                     last_finish = finish
+
+            # Stream ended without [DONE] — yield final event as fallback.
+            for slot in tool_buffers.values():
+                try:
+                    args = json.loads(slot["args"] or "{}")
+                except json.JSONDecodeError:
+                    args = {"_raw": slot["args"]}
+                yield StreamEvent(
+                    tool_use=ToolUseBlock(
+                        id=slot["id"],
+                        name=slot["name"],
+                        input=args,
+                    )
+                )
+            yield StreamEvent(
+                usage=usage,
+                stop_reason=last_finish or "stop",
+                final_text=final_text,
+            )
 
     # ------------------------------------------------------------------ retry
 
